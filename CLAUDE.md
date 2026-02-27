@@ -81,23 +81,20 @@ DNS is managed in **AWS Route53**. Records in the `quixotry.me` hosted zone:
 
 **Static Web App** auto-deploys on push to `main` in `skarumbu/my-website`. The workflow is at `.github/workflows/azure-static-web-apps.yml`. The deployment token is stored as a GitHub Actions secret `AZURE_STATIC_WEB_APPS_API_TOKEN`.
 
-**Digits API** is deployed manually via Kudu zipdeploy (see below). The source files live at `~/digits/`.
+**Digits API** auto-deploys via GitHub Actions on every push to `main` in `skarumbu/digits`. No manual steps needed.
 
 ## Digits API Deployment
 
-The Digits API uses the Azure Functions v2 Python model (`function_app.py` + `host.json` + `requirements.txt`). Source files are in `~/digits/`.
+The Digits API uses the Azure Functions v2 Python model (`function_app.py` + `host.json` + `requirements.txt`). Source lives in the `skarumbu/digits` repo.
 
-To redeploy after code changes:
+**Automated (current):** `.github/workflows/deploy.yml` in `skarumbu/digits` triggers on push to `main` and deploys via `Azure/functions-action@v1`. Requires the `AZURE_FUNCTIONAPP_PUBLISH_PROFILE` secret in that repo (download from Azure Portal → Function App → Get publish profile).
+
+**Manual fallback:** If you need to deploy outside of git (e.g. from a local branch), install Azure Functions Core Tools and run:
 ```bash
-powershell.exe -Command "Compress-Archive -Force -Path 'C:\Users\Sriram\digits\function_app.py','C:\Users\Sriram\digits\host.json','C:\Users\Sriram\digits\requirements.txt','C:\Users\Sriram\digits\digits_creator.py','C:\Users\Sriram\digits\digits_solver.py','C:\Users\Sriram\digits\nodes.py' -DestinationPath 'C:\Users\Sriram\digits-deploy.zip'"
-
-curl -X POST \
-  -u '$digits-api-prod-hwbxtkz6lsfoq:<publishing-password>' \
-  --data-binary @/c/Users/Sriram/digits-deploy.zip \
-  -H "Content-Type: application/zip" \
-  "https://digits-api-prod-hwbxtkz6lsfoq.scm.azurewebsites.net/api/zipdeploy"
+export PATH="$PATH:/c/Program Files/Microsoft SDKs/Azure/CLI2/wbin:/c/Users/Sriram/AppData/Roaming/npm"
+cd ~/digits
+func azure functionapp publish digits-api-prod-hwbxtkz6lsfoq --python
 ```
-Get the publishing password via: `az webapp deployment list-publishing-credentials --name digits-api-prod-hwbxtkz6lsfoq --resource-group my-website-prod-rg --query publishingPassword -o tsv`
 
 **Note**: `solve_digits()` mutates the matrix in-place (replaces ints with `Node` objects). When reading matrix values back, use `node.value`.
 
