@@ -104,7 +104,6 @@ The Uvicorn server runs on **port 80** (not 8000). The Bicep template was correc
 
 ## Known Issues
 
-- **Syntax error** in `build-and-deploy-apis.sh` line ~67: `cd ..momentum-finder:latest"` — should be `cd ..`
 - CORS on Digits API is currently `*` (all origins)
 
 ## Key Parameters (`main.bicep`)

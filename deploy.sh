@@ -29,11 +29,15 @@ DEPLOYMENT_NAME="my-website-deployment-$(date +%Y%m%d-%H%M%S)"
 ENVIRONMENT="prod"
 LOCATION="centralus"
 
+# After the first ACR push, set MOMENTUM_FINDER_IMAGE to the real ACR image
+# (e.g. "myregistry.azurecr.io/momentum-finder:latest") to prevent resetting to the placeholder.
+MOMENTUM_FINDER_IMAGE="${MOMENTUM_FINDER_IMAGE:-mcr.microsoft.com/azuredocs/containerapps-helloworld:latest}"
+
 az deployment sub create \
   --name "$DEPLOYMENT_NAME" \
   --location "$LOCATION" \
   --template-file main.bicep \
-  --parameters environment="$ENVIRONMENT" location="$LOCATION" customDomain="$CUSTOM_DOMAIN"
+  --parameters environment="$ENVIRONMENT" location="$LOCATION" customDomain="$CUSTOM_DOMAIN" momentumFinderImage="$MOMENTUM_FINDER_IMAGE"
 
 # Get outputs
 echo "📊 Getting deployment outputs..."

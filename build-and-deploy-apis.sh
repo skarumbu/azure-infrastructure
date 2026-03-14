@@ -33,9 +33,9 @@ fi
 cd "$MOMENTUM_DIR"
 
 # Check for Dockerfile location
-if [ -f "docker/Dockerfile" ]; then
+if [ -f "docker/dockerfile" ]; then
     echo "📝 Found Dockerfile in docker/ subdirectory"
-    DOCKERFILE_PATH="docker/Dockerfile"
+    DOCKERFILE_PATH="docker/dockerfile"
     BUILD_CONTEXT="."
 elif [ -f "Dockerfile" ]; then
     echo "📝 Found Dockerfile in root directory"
@@ -63,8 +63,6 @@ az containerapp update \
   --name "$CONTAINER_APP" \
   --resource-group "$RESOURCE_GROUP" \
   --image "${CONTAINER_REGISTRY_SERVER}/momentum-finder:latest"
-
-cd ..momentum-finder:latest"
 
 cd ..
 

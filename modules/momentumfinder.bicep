@@ -4,6 +4,9 @@ param environment string
 param containerRegistryName string
 param containerAppEnvId string
 
+@description('Container image to deploy. Defaults to a placeholder; pass the real ACR image after first push.')
+param image string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
 resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-preview' existing = {
   name: containerRegistryName
 }
@@ -43,8 +46,7 @@ resource momentumFinderApp 'Microsoft.App/containerApps@2023-05-01' = {
       containers: [
         {
           name: 'momentum-finder'
-          // Use a placeholder image - will be updated when you run build-and-deploy-apis.sh
-          image: 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+          image: image
           resources: {
             cpu: json('0.5')
             memory: '1Gi'

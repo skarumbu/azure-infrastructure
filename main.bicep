@@ -9,6 +9,9 @@ param environment string = 'prod'
 @description('Your custom domain name')
 param customDomain string = 'https://www.quixotry.me/'
 
+@description('Momentum Finder container image. After first ACR push, pass the real image to avoid resetting to placeholder.')
+param momentumFinderImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
 // Resource Group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: 'my-website-${environment}-rg'
@@ -55,6 +58,7 @@ module momentumFinderAPI 'modules/momentumfinder.bicep' = {
     environment: environment
     containerRegistryName: containerRegistry.outputs.name
     containerAppEnvId: containerAppEnv.outputs.id
+    image: momentumFinderImage
   }
 }
 
