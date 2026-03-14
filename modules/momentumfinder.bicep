@@ -102,6 +102,63 @@ resource momentumFinderApp 'Microsoft.App/containerApps@2023-05-01' = {
   }
 }
 
+// Scheduled Container App Job for weekly model retraining.
+// Runs inside Azure so stats.nba.com API calls are not blocked.
+resource retrainJob 'Microsoft.App/jobs@2023-05-01' = {
+  name: 'momentum-finder-retrain-${environment}'
+  location: location
+  properties: {
+    environmentId: containerAppEnvId
+    configuration: {
+      triggerType: 'Schedule'
+      scheduleTriggerConfig: {
+        cronExpression: '0 6 * * 1'  // Every Monday at 6am UTC
+        parallelism: 1
+        replicaCompletionCount: 1
+      }
+      replicaTimeout: 7200  // 2 hour max runtime
+      replicaRetryLimit: 1
+      registries: [
+        {
+          server: containerRegistry.properties.loginServer
+          username: containerRegistry.listCredentials().username
+          passwordSecretRef: 'registry-password'
+        }
+      ]
+      secrets: [
+        {
+          name: 'registry-password'
+          value: containerRegistry.listCredentials().passwords[0].value
+        }
+        {
+          name: 'model-storage-connection-string'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${modelStorageAccount.name};AccountKey=${modelStorageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
+        }
+      ]
+    }
+    template: {
+      containers: [
+        {
+          name: 'retrain'
+          image: image
+          command: ['python', 'model_trainer.py']
+          env: [
+            {
+              name: 'MODEL_STORAGE_CONNECTION_STRING'
+              secretRef: 'model-storage-connection-string'
+            }
+          ]
+          resources: {
+            cpu: json('1.0')
+            memory: '2Gi'
+          }
+        }
+      ]
+    }
+  }
+}
+
 output url string = 'https://${momentumFinderApp.properties.configuration.ingress.fqdn}'
 output name string = momentumFinderApp.name
 output modelStorageAccountName string = modelStorageAccount.name
+output retrainJobName string = retrainJob.name
