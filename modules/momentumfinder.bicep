@@ -11,6 +11,27 @@ resource containerRegistry 'Microsoft.ContainerRegistry/registries@2023-01-01-pr
   name: containerRegistryName
 }
 
+// Storage account for ML model files (downloaded by the app at startup)
+resource modelStorageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
+  name: 'modelsst${uniqueString(resourceGroup().id)}'
+  location: location
+  sku: {
+    name: 'Standard_LRS'
+  }
+  kind: 'StorageV2'
+  properties: {
+    supportsHttpsTrafficOnly: true
+    minimumTlsVersion: 'TLS1_2'
+  }
+}
+
+resource modelsBlobContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+  name: '${modelStorageAccount.name}/default/models'
+  properties: {
+    publicAccess: 'None'
+  }
+}
+
 resource momentumFinderApp 'Microsoft.App/containerApps@2023-05-01' = {
   name: 'momentum-finder-${environment}'
   location: location
@@ -40,6 +61,10 @@ resource momentumFinderApp 'Microsoft.App/containerApps@2023-05-01' = {
           name: 'registry-password'
           value: containerRegistry.listCredentials().passwords[0].value
         }
+        {
+          name: 'model-storage-connection-string'
+          value: 'DefaultEndpointsProtocol=https;AccountName=${modelStorageAccount.name};AccountKey=${modelStorageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
+        }
       ]
     }
     template: {
@@ -47,6 +72,12 @@ resource momentumFinderApp 'Microsoft.App/containerApps@2023-05-01' = {
         {
           name: 'momentum-finder'
           image: image
+          env: [
+            {
+              name: 'MODEL_STORAGE_CONNECTION_STRING'
+              secretRef: 'model-storage-connection-string'
+            }
+          ]
           resources: {
             cpu: json('0.5')
             memory: '1Gi'
@@ -73,3 +104,4 @@ resource momentumFinderApp 'Microsoft.App/containerApps@2023-05-01' = {
 
 output url string = 'https://${momentumFinderApp.properties.configuration.ingress.fqdn}'
 output name string = momentumFinderApp.name
+output modelStorageAccountName string = modelStorageAccount.name
