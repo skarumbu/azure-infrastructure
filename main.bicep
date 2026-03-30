@@ -12,6 +12,24 @@ param customDomain string = 'https://www.quixotry.me/'
 @description('Momentum Finder container image. After first ACR push, pass the real image to avoid resetting to placeholder.')
 param momentumFinderImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
+@description('Trail Finder container image. After first ACR push, pass the real image to avoid resetting to placeholder.')
+param trailFinderImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
+@secure()
+@description('Google Places + Geocoding API key')
+param googlePlacesApiKey string
+
+@secure()
+@description('Google Custom Search API key')
+param googleSearchApiKey string
+
+@secure()
+@description('Google Programmable Search Engine ID')
+param googleSearchEngineId string
+
+@description('Name of the existing Azure AI Foundry (Cognitive Services) account')
+param aiFoundryName string = 'trail-finder-foundry'
+
 // Resource Group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: 'my-website-${environment}-rg'
@@ -62,6 +80,23 @@ module momentumFinderAPI 'modules/momentumfinder.bicep' = {
   }
 }
 
+// Module: Trail Finder API (Container App)
+module trailFinderAPI 'modules/trailfinder.bicep' = {
+  scope: rg
+  name: 'trailFinderDeployment'
+  params: {
+    location: location
+    environment: environment
+    containerRegistryName: containerRegistry.outputs.name
+    containerAppEnvId: containerAppEnv.outputs.id
+    image: trailFinderImage
+    googlePlacesApiKey: googlePlacesApiKey
+    googleSearchApiKey: googleSearchApiKey
+    googleSearchEngineId: googleSearchEngineId
+    aiFoundryName: aiFoundryName
+  }
+}
+
 // Module: Azure Functions for Digits APIs
 module digitsAPI 'modules/digitsfunctions.bicep' = {
   scope: rg
@@ -72,10 +107,34 @@ module digitsAPI 'modules/digitsfunctions.bicep' = {
   }
 }
 
+// Module: Dashboard API (Azure Functions)
+module dashboardAPI 'modules/dashboardapi.bicep' = {
+  name: 'dashboardAPIDeployment'
+  scope: rg
+  params: {
+    location: location
+    logAnalyticsWorkspaceResourceId: containerAppEnv.outputs.logAnalyticsWorkspaceResourceId
+    digitsMetricsConnectionString: digitsAPI.outputs.storageConnectionString
+    momentumFinderUrl: momentumFinderAPI.outputs.url
+    trailFinderUrl: trailFinderAPI.outputs.url
+  }
+}
+
+// Cost Management Reader role assignment at subscription scope
+resource costMgmtRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(subscription().id, dashboardAPI.outputs.functionPrincipalId, 'CostManagementReader')
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '72fafb9e-0641-4937-9268-a91bfd8191a3')
+    principalId: dashboardAPI.outputs.functionPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // Outputs
 output staticWebAppUrl string = staticWebApp.outputs.defaultHostname
 output staticWebAppName string = staticWebApp.outputs.name
 output momentumFinderUrl string = momentumFinderAPI.outputs.url
+output trailFinderUrl string = trailFinderAPI.outputs.url
 output digitsAPIUrl string = digitsAPI.outputs.functionAppUrl
 output containerRegistryName string = containerRegistry.outputs.name
 output containerRegistryLoginServer string = containerRegistry.outputs.loginServer

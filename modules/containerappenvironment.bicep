@@ -28,3 +28,4 @@ resource containerAppEnv 'Microsoft.App/managedEnvironments@2023-05-01' = {
 
 output id string = containerAppEnv.id
 output name string = containerAppEnv.name
+output logAnalyticsWorkspaceResourceId string = logAnalytics.id
