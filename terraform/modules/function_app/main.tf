@@ -55,6 +55,9 @@ resource "azurerm_linux_function_app" "main" {
     application_stack {
       python_version = var.python_version
     }
+    cors {
+      allowed_origins = ["*"]
+    }
   }
 
   app_settings = merge(var.app_settings, var.secret_app_settings, {
