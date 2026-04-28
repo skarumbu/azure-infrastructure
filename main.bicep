@@ -30,6 +30,27 @@ param googleSearchEngineId string
 @description('Name of the existing Azure AI Foundry (Cognitive Services) account')
 param aiFoundryName string = 'trail-finder-foundry'
 
+@description('Azure Entra ID tenant ID — from the App Registration created by setup-app-registration.sh')
+param azureTenantId string
+
+@description('App Registration client ID — from the App Registration created by setup-app-registration.sh')
+param azureClientId string
+
+@secure()
+@description('App Registration client secret — from the App Registration created by setup-app-registration.sh')
+param azureClientSecret string
+
+@description('ideas-api App Registration client ID')
+param ideasApiClientId string = 'bb744b67-4a31-41ab-a52b-006f90fce6cb'
+
+@secure()
+@description('ideas-api App Registration client secret')
+param ideasApiClientSecret string
+
+@secure()
+@description('Shared write key for machine-to-machine writes (ideator job → ideas-api)')
+param ideasApiWriteKey string
+
 // Resource Group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: 'my-website-${environment}-rg'
@@ -117,16 +138,31 @@ module dashboardAPI 'modules/dashboardapi.bicep' = {
     digitsMetricsConnectionString: digitsAPI.outputs.storageConnectionString
     momentumFinderUrl: momentumFinderAPI.outputs.url
     trailFinderUrl: trailFinderAPI.outputs.url
+    azureTenantId: azureTenantId
+    azureClientId: azureClientId
+    azureClientSecret: azureClientSecret
+  }
+}
+
+// Module: Ideas API (Azure Functions)
+module ideasAPI 'modules/ideasapi.bicep' = {
+  name: 'ideasAPIDeployment'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+    azureTenantId: azureTenantId
+    ideasApiClientId: ideasApiClientId
+    ideasApiClientSecret: ideasApiClientSecret
+    ideasApiWriteKey: ideasApiWriteKey
   }
 }
 
 // Cost Management Reader role assignment at subscription scope
-resource costMgmtRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(subscription().id, dashboardAPI.outputs.functionPrincipalId, 'CostManagementReader')
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '72fafb9e-0641-4937-9268-a91bfd8191a3')
-    principalId: dashboardAPI.outputs.functionPrincipalId
-    principalType: 'ServicePrincipal'
+module costMgmtRole 'modules/costmgmtrole.bicep' = {
+  name: 'costMgmtRoleDeployment'
+  params: {
+    functionPrincipalId: dashboardAPI.outputs.functionPrincipalId
   }
 }
 
@@ -139,3 +175,5 @@ output digitsAPIUrl string = digitsAPI.outputs.functionAppUrl
 output containerRegistryName string = containerRegistry.outputs.name
 output containerRegistryLoginServer string = containerRegistry.outputs.loginServer
 output resourceGroupName string = rg.name
+output ideasAPIUrl string = ideasAPI.outputs.functionAppUrl
+output ideasAPIAppName string = ideasAPI.outputs.functionAppName
