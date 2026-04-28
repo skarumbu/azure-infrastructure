@@ -48,6 +48,18 @@ resource "azuread_application" "ideas_api" {
       value                      = "access_as_user"
     }
   }
+
+  single_page_application {
+    redirect_uris = [
+      "https://www.quixotry.me/ideas",
+      "http://localhost:3000/ideas",
+    ]
+  }
+
+  # identifier_uris is managed by azuread_application_identifier_uri below.
+  lifecycle {
+    ignore_changes = [identifier_uris]
+  }
 }
 
 # Set identifier URI to api://{client_id} — must be done as a separate resource
