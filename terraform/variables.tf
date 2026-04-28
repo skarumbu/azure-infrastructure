@@ -12,19 +12,7 @@ variable "location" {
 
 variable "ideas_api_auth_tenant_id" {
   type        = string
-  description = "Azure AD tenant ID for ideas-api EasyAuth. Pass via TF_VAR_ideas_api_auth_tenant_id."
-}
-
-variable "ideas_api_auth_client_id" {
-  type        = string
-  description = "App Registration client ID for ideas-api."
-  default     = "bb744b67-4a31-41ab-a52b-006f90fce6cb"
-}
-
-variable "ideas_api_auth_client_secret" {
-  type        = string
-  sensitive   = true
-  description = "App Registration client secret for ideas-api. Pass via TF_VAR_ideas_api_auth_client_secret."
+  description = "Azure AD tenant ID. Pass via TF_VAR_ideas_api_auth_tenant_id."
 }
 
 variable "ideas_api_write_key" {

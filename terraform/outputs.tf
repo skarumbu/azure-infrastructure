@@ -7,3 +7,8 @@ output "ideas_api_app_name" {
   value       = module.ideas_api.function_app_name
   description = "Use as IDEAS_API_APP_NAME in the ideas-api GitHub Actions secrets"
 }
+
+output "ideas_api_client_id" {
+  value       = azuread_application.ideas_api.client_id
+  description = "Update ideasApiRequest scope in my-website/src/authConfig.js with this value"
+}
