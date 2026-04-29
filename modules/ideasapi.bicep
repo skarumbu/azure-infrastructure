@@ -41,6 +41,11 @@ resource ideasTable 'Microsoft.Storage/storageAccounts/tableServices/tables@2022
   name: 'ideas'
 }
 
+resource projectsTable 'Microsoft.Storage/storageAccounts/tableServices/tables@2022-09-01' = {
+  parent: tableService
+  name: 'projects'
+}
+
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
   name: 'ideas-api-plan-${environment}'
   location: location
