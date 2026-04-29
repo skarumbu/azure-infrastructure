@@ -1,0 +1,45 @@
+name: Deploy Azure Infrastructure
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Set subscription
+        run: az account set --subscription ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Read current Momentum Finder image
+        id: mf_image
+        run: |
+          IMAGE=$(az containerapp show \
+            --name momentum-finder-prod \
+            --resource-group my-website-prod-rg \
+            --query "properties.template.containers[0].image" \
+            --output tsv 2>/dev/null || echo "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest")
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy Bicep
+        run: |
+          az deployment sub create \
+            --name "infra-deploy-${{ github.sha }}" \
+            --location centralus \
+            --template-file main.bicep \
+            --parameters \
+              environment=prod \
+              location=centralus \
+              customDomain="https://www.quixotry.me/" \
+              momentumFinderImage="${{ steps.mf_image.outputs.image }}" \
+              azureTenantId="${{ secrets.AZURE_TENANT_ID }}" \
+              azureClientId="${{ secrets.IDEAS_API_CLIENT_ID }}" \
+              azureClientSecret="${{ secrets.IDEAS_API_CLIENT_SECRET }}"
