@@ -177,7 +177,7 @@ resource authSettings 'Microsoft.Web/sites/config@2022-09-01' = {
 }
 
 resource logAnalyticsReaderRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(logAnalyticsWorkspaceResourceId, functionApp.id, 'LogAnalyticsReader')
+  name: guid(resourceGroup().id, functionApp.id, 'LogAnalyticsReader')
   properties: {
     roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', '73c42c96-874c-492b-b04d-ab87d138a893')
     principalId: functionApp.identity.principalId
