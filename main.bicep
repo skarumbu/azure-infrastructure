@@ -51,6 +51,13 @@ param ideasApiClientSecret string
 @description('Shared write key for machine-to-machine writes (ideator job → ideas-api)')
 param ideasApiWriteKey string
 
+@secure()
+@description('GitHub fine-grained PAT for ideas-bot to push branches and open PRs')
+param githubPat string
+
+@description('Ideas bot container image. Updated after first ACR push.')
+param ideasBotImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
 // Resource Group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: 'my-website-${environment}-rg'
@@ -155,6 +162,36 @@ module ideasAPI 'modules/ideasapi.bicep' = {
     ideasApiClientId: ideasApiClientId
     ideasApiClientSecret: ideasApiClientSecret
     ideasApiWriteKey: ideasApiWriteKey
+  }
+}
+
+// Module: Ideas Bot OpenAI resource
+module ideasBotOpenAI 'modules/ideasbotopenai.bicep' = {
+  name: 'ideasBotOpenAIDeployment'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+  }
+}
+
+// Module: Ideas Bot Container App Job
+module ideasBot 'modules/ideasbot.bicep' = {
+  name: 'ideasBotDeployment'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+    containerRegistryName: containerRegistry.outputs.name
+    containerAppEnvId: containerAppEnv.outputs.id
+    ideasApiFunctionPrincipalId: ideasAPI.outputs.functionPrincipalId
+    ideasApiUrl: ideasAPI.outputs.functionAppUrl
+    azureOpenAiEndpoint: ideasBotOpenAI.outputs.endpoint
+    azureOpenAiDeploymentName: ideasBotOpenAI.outputs.deploymentName
+    azureOpenAiApiKey: ideasBotOpenAI.outputs.apiKey
+    githubPat: githubPat
+    ideasWriteKey: ideasApiWriteKey
+    image: ideasBotImage
   }
 }
 

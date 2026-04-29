@@ -107,6 +107,18 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'IDEAS_CLIENT_SECRET'
           value: ideasApiClientSecret
         }
+        {
+          name: 'BOT_JOB_SUBSCRIPTION_ID'
+          value: subscription().subscriptionId
+        }
+        {
+          name: 'BOT_JOB_RESOURCE_GROUP'
+          value: resourceGroup().name
+        }
+        {
+          name: 'BOT_JOB_NAME'
+          value: 'ideas-bot-${environment}'
+        }
       ]
       cors: {
         allowedOrigins: [
@@ -161,3 +173,4 @@ resource tableStorageContributorRole 'Microsoft.Authorization/roleAssignments@20
 
 output functionAppName string = functionApp.name
 output functionAppUrl string = 'https://${functionApp.properties.defaultHostName}'
+output functionPrincipalId string = functionApp.identity.principalId
