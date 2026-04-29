@@ -46,7 +46,7 @@ jobs:
             --parameters \
               environment=prod \
               location=centralus \
-              customDomain="https://www.quixotry.me/" \
+              customDomain="www.quixotry.me" \
               momentumFinderImage="${{ steps.mf_image.outputs.image }}" \
               trailFinderImage="${{ steps.tf_image.outputs.image }}" \
               googlePlacesApiKey="${{ secrets.GOOGLE_PLACES_API_KEY }}" \
