@@ -58,5 +58,5 @@ jobs:
               ideasApiClientId="${{ secrets.IDEAS_API_CLIENT_ID }}" \
               ideasApiClientSecret="${{ secrets.IDEAS_API_CLIENT_SECRET }}" \
               ideasApiWriteKey="${{ secrets.IDEAS_API_WRITE_KEY }}" \
-              githubPat="${{ secrets.GITHUB_PAT }}" \
+              githubPat="${{ secrets.BOT_GITHUB_PAT }}" \
               ideasBotImage="${{ secrets.IDEAS_BOT_IMAGE }}"
