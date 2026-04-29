@@ -27,6 +27,16 @@ jobs:
             --output tsv 2>/dev/null || echo "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest")
           echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
 
+      - name: Read current Trail Finder image
+        id: tf_image
+        run: |
+          IMAGE=$(az containerapp show \
+            --name trail-finder-prod \
+            --resource-group my-website-prod-rg \
+            --query "properties.template.containers[0].image" \
+            --output tsv 2>/dev/null || echo "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest")
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
       - name: Deploy Bicep
         run: |
           az deployment sub create \
@@ -38,6 +48,13 @@ jobs:
               location=centralus \
               customDomain="https://www.quixotry.me/" \
               momentumFinderImage="${{ steps.mf_image.outputs.image }}" \
+              trailFinderImage="${{ steps.tf_image.outputs.image }}" \
+              googlePlacesApiKey="${{ secrets.GOOGLE_PLACES_API_KEY }}" \
+              googleSearchApiKey="${{ secrets.GOOGLE_SEARCH_API_KEY }}" \
+              googleSearchEngineId="${{ secrets.GOOGLE_SEARCH_ENGINE_ID }}" \
               azureTenantId="${{ secrets.AZURE_TENANT_ID }}" \
-              azureClientId="${{ secrets.IDEAS_API_CLIENT_ID }}" \
-              azureClientSecret="${{ secrets.IDEAS_API_CLIENT_SECRET }}"
+              azureClientId="${{ secrets.DASHBOARD_API_CLIENT_ID }}" \
+              azureClientSecret="${{ secrets.DASHBOARD_API_CLIENT_SECRET }}" \
+              ideasApiClientId="${{ secrets.IDEAS_API_CLIENT_ID }}" \
+              ideasApiClientSecret="${{ secrets.IDEAS_API_CLIENT_SECRET }}" \
+              ideasApiWriteKey="${{ secrets.IDEAS_API_WRITE_KEY }}"

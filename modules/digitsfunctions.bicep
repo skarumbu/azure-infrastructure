@@ -78,4 +78,4 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
 output functionAppUrl string = 'https://${functionApp.properties.defaultHostName}'
 output functionAppName string = functionApp.name
 output id string = functionApp.id
-output storageConnectionString string = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=${environment().suffixes.storage}'
+output storageConnectionString string = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
