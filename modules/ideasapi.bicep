@@ -15,20 +15,16 @@ param ideasApiClientSecret string
 @description('Shared write key for machine-to-machine writes from the ideator job')
 param ideasApiWriteKey string
 
-var uniqueSuffix = take(uniqueString(resourceGroup().id, 'ideas'), 10)
+@description('Existing storage account name (created before Bicep management)')
+param existingStorageAccountName string = 'ideasapiprodce2507b2'
+
+@description('Existing app service plan name')
+param existingAppServicePlanName string = 'ideas-api-prod-plan'
+
 var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
 
-resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
-  name: 'ideasst${uniqueSuffix}'
-  location: location
-  sku: {
-    name: 'Standard_LRS'
-  }
-  kind: 'StorageV2'
-  properties: {
-    supportsHttpsTrafficOnly: true
-    minimumTlsVersion: 'TLS1_2'
-  }
+resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' existing = {
+  name: existingStorageAccountName
 }
 
 resource tableService 'Microsoft.Storage/storageAccounts/tableServices@2022-09-01' = {
@@ -46,21 +42,12 @@ resource projectsTable 'Microsoft.Storage/storageAccounts/tableServices/tables@2
   name: 'projects'
 }
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
-  name: 'ideas-api-plan-${environment}'
-  location: location
-  sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
-  }
-  properties: {
-    reserved: true
-  }
-  kind: 'functionapp'
+resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' existing = {
+  name: existingAppServicePlanName
 }
 
 resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
-  name: 'ideas-api-prod-${uniqueSuffix}'
+  name: 'ideas-api-prod'
   location: location
   kind: 'functionapp,linux'
   identity: {
