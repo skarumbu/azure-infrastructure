@@ -1,5 +1,4 @@
-@description('Location for the OpenAI resource. gpt-4o-mini requires eastus.')
-param location string = 'eastus'
+param location string
 
 var uniqueSuffix = take(uniqueString(resourceGroup().id, 'lplan-oai'), 8)
 
@@ -16,9 +15,9 @@ resource openAiAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   }
 }
 
-resource gpt4oMiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
+resource gpt4oDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   parent: openAiAccount
-  name: 'gpt-4o-mini'
+  name: 'gpt-4o'
   sku: {
     name: 'Standard'
     capacity: 10
@@ -26,12 +25,12 @@ resource gpt4oMiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
   properties: {
     model: {
       format: 'OpenAI'
-      name: 'gpt-4o-mini'
-      version: '2024-07-18'
+      name: 'gpt-4o'
+      version: '2024-11-20'
     }
   }
 }
 
 output endpoint string = openAiAccount.properties.endpoint
 output apiKey string = openAiAccount.listKeys().key1
-output deploymentName string = gpt4oMiniDeployment.name
+output deploymentName string = gpt4oDeployment.name
