@@ -33,11 +33,25 @@ LOCATION="centralus"
 # (e.g. "myregistry.azurecr.io/momentum-finder:latest") to prevent resetting to the placeholder.
 MOMENTUM_FINDER_IMAGE="${MOMENTUM_FINDER_IMAGE:-mcr.microsoft.com/azuredocs/containerapps-helloworld:latest}"
 
+if [ -z "$AZURE_TENANT_ID" ] || [ -z "$AZURE_CLIENT_ID" ] || [ -z "$AZURE_CLIENT_SECRET" ]; then
+    echo "❌ Missing required env vars: AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET"
+    echo "   Run ./setup-app-registration.sh first to create the Entra ID App Registration."
+    exit 1
+fi
+
+if [ -z "$GOOGLE_CLIENT_ID" ]; then
+    echo "❌ Missing required env var: GOOGLE_CLIENT_ID"
+    exit 1
+fi
+
 az deployment sub create \
   --name "$DEPLOYMENT_NAME" \
   --location "$LOCATION" \
   --template-file main.bicep \
-  --parameters environment="$ENVIRONMENT" location="$LOCATION" customDomain="$CUSTOM_DOMAIN" momentumFinderImage="$MOMENTUM_FINDER_IMAGE"
+  --parameters environment="$ENVIRONMENT" location="$LOCATION" customDomain="$CUSTOM_DOMAIN" momentumFinderImage="$MOMENTUM_FINDER_IMAGE" \
+               azureTenantId="$AZURE_TENANT_ID" azureClientId="$AZURE_CLIENT_ID" azureClientSecret="$AZURE_CLIENT_SECRET" \
+               googleClientId="$GOOGLE_CLIENT_ID" \
+               corsOrigin="${CORS_ORIGIN:-https://www.quixotry.me}"
 
 # Get outputs
 echo "📊 Getting deployment outputs..."
@@ -49,6 +63,8 @@ MOMENTUM_FINDER_URL=$(echo "$OUTPUTS" | jq -r '.momentumFinderUrl.value')
 DIGITS_API_URL=$(echo "$OUTPUTS" | jq -r '.digitsAPIUrl.value')
 CONTAINER_REGISTRY=$(echo "$OUTPUTS" | jq -r '.containerRegistryLoginServer.value')
 RESOURCE_GROUP=$(echo "$OUTPUTS" | jq -r '.resourceGroupName.value')
+LEARNING_PLAN_URL=$(echo "$OUTPUTS" | jq -r '.learningPlanAPIUrl.value')
+LEARNING_PLAN_APP_NAME=$(echo "$OUTPUTS" | jq -r '.learningPlanAPIAppName.value')
 
 echo ""
 echo "✅ Deployment completed successfully!"
@@ -58,6 +74,7 @@ echo "📍 Resource Group: $RESOURCE_GROUP"
 echo "🌐 Frontend URL: https://$STATIC_WEB_APP_URL"
 echo "🔧 Momentum Finder API: $MOMENTUM_FINDER_URL"
 echo "🔢 Digits API: $DIGITS_API_URL"
+echo "📚 Learning Plan API: $LEARNING_PLAN_URL (app: $LEARNING_PLAN_APP_NAME)"
 echo "📦 Container Registry: $CONTAINER_REGISTRY"
 echo ""
 echo "Next steps:"

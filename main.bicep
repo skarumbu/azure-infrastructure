@@ -55,6 +55,13 @@ param ideasApiWriteKey string
 @description('GitHub fine-grained PAT for ideas-bot to push branches and open PRs')
 param githubPat string
 
+@secure()
+@description('Google OAuth client ID for learning-plan-api token verification')
+param googleClientId string
+
+@description('CORS allowed origin for learning-plan-api (the SWA domain)')
+param corsOrigin string = 'https://www.quixotry.me'
+
 @description('Ideas bot container image. Updated after first ACR push.')
 param ideasBotImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
@@ -175,6 +182,31 @@ module ideasBotOpenAI 'modules/ideasbotopenai.bicep' = {
   }
 }
 
+// Module: Learning Plan OpenAI resource
+module learningPlanOpenAI 'modules/learningplanopenai.bicep' = {
+  name: 'learningPlanOpenAIDeployment'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+  }
+}
+
+// Module: Learning Plan API (Azure Functions)
+module learningPlanAPI 'modules/learningplanapi.bicep' = {
+  name: 'learningPlanAPIDeployment'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+    googleClientId: googleClientId
+    azureOpenAiEndpoint: learningPlanOpenAI.outputs.endpoint
+    azureOpenAiApiKey: learningPlanOpenAI.outputs.apiKey
+    azureOpenAiDeploymentName: learningPlanOpenAI.outputs.deploymentName
+    corsOrigin: corsOrigin
+  }
+}
+
 // Module: Ideas Bot Container App Job
 module ideasBot 'modules/ideasbot.bicep' = {
   name: 'ideasBotDeployment'
@@ -214,3 +246,5 @@ output containerRegistryLoginServer string = containerRegistry.outputs.loginServ
 output resourceGroupName string = rg.name
 output ideasAPIUrl string = ideasAPI.outputs.functionAppUrl
 output ideasAPIAppName string = ideasAPI.outputs.functionAppName
+output learningPlanAPIUrl string = learningPlanAPI.outputs.functionAppUrl
+output learningPlanAPIAppName string = learningPlanAPI.outputs.functionAppName

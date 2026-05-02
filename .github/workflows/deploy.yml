@@ -59,4 +59,6 @@ jobs:
               ideasApiClientSecret="${{ secrets.IDEAS_API_CLIENT_SECRET }}" \
               ideasApiWriteKey="${{ secrets.IDEAS_API_WRITE_KEY }}" \
               githubPat="${{ secrets.BOT_GITHUB_PAT }}" \
-              ideasBotImage="${{ secrets.IDEAS_BOT_IMAGE }}"
+              ideasBotImage="${{ secrets.IDEAS_BOT_IMAGE }}" \
+              googleClientId="${{ secrets.GOOGLE_CLIENT_ID }}" \
+              corsOrigin="https://www.quixotry.me"
