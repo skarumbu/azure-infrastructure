@@ -186,10 +186,7 @@ module ideasBotOpenAI 'modules/ideasbotopenai.bicep' = {
 module learningPlanOpenAI 'modules/learningplanopenai.bicep' = {
   name: 'learningPlanOpenAIDeployment'
   scope: rg
-  params: {
-    location: location
-    environment: environment
-  }
+  params: {}
 }
 
 // Module: Learning Plan API (Azure Functions)

@@ -1,5 +1,5 @@
-param location string
-param environment string
+@description('Location for the OpenAI resource. gpt-4o-mini requires eastus.')
+param location string = 'eastus'
 
 var uniqueSuffix = take(uniqueString(resourceGroup().id, 'lplan-oai'), 8)
 
