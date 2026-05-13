@@ -42,6 +42,11 @@ resource projectsTable 'Microsoft.Storage/storageAccounts/tableServices/tables@2
   name: 'projects'
 }
 
+resource updatesTable 'Microsoft.Storage/storageAccounts/tableServices/tables@2022-09-01' = {
+  parent: tableService
+  name: 'updates'
+}
+
 resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' existing = {
   name: existingAppServicePlanName
 }
