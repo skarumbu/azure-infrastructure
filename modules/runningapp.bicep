@@ -21,8 +21,8 @@ resource swa 'Microsoft.Web/staticSites@2022-09-01' = {
   name: 'running-app-${environment}'
   location: location
   sku: {
-    name: 'Free'
-    tier: 'Free'
+    name: 'Standard'
+    tier: 'Standard'
   }
   properties: {
     repositoryUrl: 'https://github.com/skarumbu/running-app'
