@@ -172,6 +172,16 @@ module ideasAPI 'modules/ideasapi.bicep' = {
   }
 }
 
+// Module: Posts API (Azure Functions)
+module postsAPI 'modules/postsapi.bicep' = {
+  name: 'postsAPIDeployment'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+  }
+}
+
 // Module: Ideas Bot OpenAI resource
 module ideasBotOpenAI 'modules/ideasbotopenai.bicep' = {
   name: 'ideasBotOpenAIDeployment'
@@ -247,3 +257,5 @@ output ideasAPIUrl string = ideasAPI.outputs.functionAppUrl
 output ideasAPIAppName string = ideasAPI.outputs.functionAppName
 output learningPlanAPIUrl string = learningPlanAPI.outputs.functionAppUrl
 output learningPlanAPIAppName string = learningPlanAPI.outputs.functionAppName
+output postsAPIUrl string = postsAPI.outputs.functionAppUrl
+output postsAPIAppName string = postsAPI.outputs.functionAppName
