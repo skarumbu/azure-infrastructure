@@ -90,7 +90,7 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       ]
       cors: {
         allowedOrigins: [
-          '*'
+          'https://www.quixotry.me'
         ]
       }
     }
