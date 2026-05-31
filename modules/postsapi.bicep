@@ -80,8 +80,8 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: 'true'
         }
         {
-          name: 'POSTS_STORAGE_CONNECTION_STRING'
-          value: storageConnectionString
+          name: 'POSTS_STORAGE_ACCOUNT_NAME'
+          value: storageAccount.name
         }
         {
           name: 'POSTS_CONTAINER_NAME'
@@ -111,4 +111,4 @@ resource blobDataContributorRole 'Microsoft.Authorization/roleAssignments@2022-0
 output functionAppName string = functionApp.name
 output functionAppUrl string = 'https://${functionApp.properties.defaultHostName}'
 output functionPrincipalId string = functionApp.identity.principalId
-output storageConnectionString string = storageConnectionString
+output storageAccountName string = storageAccount.name
