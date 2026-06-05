@@ -51,6 +51,13 @@ param ideasApiClientSecret string
 @description('Shared write key for machine-to-machine writes (ideator job → ideas-api)')
 param ideasApiWriteKey string
 
+@description('posts-api App Registration client ID')
+param postsApiClientId string
+
+@secure()
+@description('posts-api App Registration client secret')
+param postsApiClientSecret string
+
 @secure()
 @description('GitHub fine-grained PAT for ideas-bot to push branches and open PRs')
 param githubPat string
@@ -179,6 +186,9 @@ module postsAPI 'modules/postsapi.bicep' = {
   params: {
     location: location
     environment: environment
+    azureTenantId: azureTenantId
+    postsApiClientId: postsApiClientId
+    postsApiClientSecret: postsApiClientSecret
   }
 }
 
