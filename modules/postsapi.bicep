@@ -1,6 +1,16 @@
 param location string
 param environment string = 'prod'
 
+@description('Azure Entra ID tenant ID for EasyAuth')
+param azureTenantId string
+
+@description('posts-api App Registration client ID')
+param postsApiClientId string
+
+@secure()
+@description('posts-api App Registration client secret')
+param postsApiClientSecret string
+
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: 'postsapi${uniqueString(resourceGroup().id)}'
   location: location
@@ -87,6 +97,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'POSTS_CONTAINER_NAME'
           value: 'posts'
         }
+        {
+          name: 'POSTS_CLIENT_SECRET'
+          value: postsApiClientSecret
+        }
       ]
       cors: {
         allowedOrigins: [
@@ -95,6 +109,37 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       }
     }
     httpsOnly: true
+  }
+}
+
+resource authSettings 'Microsoft.Web/sites/config@2022-09-01' = {
+  parent: functionApp
+  name: 'authsettingsV2'
+  properties: {
+    globalValidation: {
+      requireAuthentication: false
+      unauthenticatedClientAction: 'AllowAnonymous'
+    }
+    identityProviders: {
+      azureActiveDirectory: {
+        enabled: true
+        registration: {
+          clientId: postsApiClientId
+          clientSecretSettingName: 'POSTS_CLIENT_SECRET'
+          openIdIssuer: '${az.environment().authentication.loginEndpoint}${azureTenantId}/v2.0'
+        }
+        validation: {
+          allowedAudiences: [
+            'api://${postsApiClientId}'
+          ]
+        }
+      }
+    }
+    login: {
+      tokenStore: {
+        enabled: true
+      }
+    }
   }
 }
 
