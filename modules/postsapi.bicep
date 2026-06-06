@@ -11,6 +11,13 @@ param postsApiClientId string
 @description('posts-api App Registration client secret')
 param postsApiClientSecret string
 
+@secure()
+@description('GitHub PAT with repo scope for writing posts')
+param githubToken string
+
+@description('GitHub repo in owner/repo format (e.g. skarumbu/my-website)')
+param githubRepo string = 'skarumbu/my-website'
+
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: 'postsapi${uniqueString(resourceGroup().id)}'
   location: location
@@ -28,14 +35,6 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
 resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
   parent: storageAccount
   name: 'default'
-}
-
-resource postsContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
-  parent: blobService
-  name: 'posts'
-  properties: {
-    publicAccess: 'None'
-  }
 }
 
 var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
@@ -90,16 +89,16 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: 'true'
         }
         {
-          name: 'POSTS_STORAGE_ACCOUNT_NAME'
-          value: storageAccount.name
-        }
-        {
-          name: 'POSTS_CONTAINER_NAME'
-          value: 'posts'
-        }
-        {
           name: 'POSTS_CLIENT_SECRET'
           value: postsApiClientSecret
+        }
+        {
+          name: 'GITHUB_TOKEN'
+          value: githubToken
+        }
+        {
+          name: 'GITHUB_REPO'
+          value: githubRepo
         }
       ]
       cors: {
@@ -140,16 +139,6 @@ resource authSettings 'Microsoft.Web/sites/config@2022-09-01' = {
         enabled: true
       }
     }
-  }
-}
-
-resource blobDataContributorRole 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  scope: storageAccount
-  name: guid(storageAccount.id, functionApp.id, 'StorageBlobDataContributor')
-  properties: {
-    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', 'ba92f5b4-2d11-453d-a403-e96b0029c9fe')
-    principalId: functionApp.identity.principalId
-    principalType: 'ServicePrincipal'
   }
 }
 

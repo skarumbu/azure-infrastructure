@@ -59,6 +59,13 @@ param postsApiClientId string
 param postsApiClientSecret string
 
 @secure()
+@description('GitHub PAT with repo scope for posts-api to write to GitHub')
+param githubToken string
+
+@description('GitHub repo in owner/repo format for posts-api')
+param githubRepo string = 'skarumbu/my-website'
+
+@secure()
 @description('GitHub fine-grained PAT for ideas-bot to push branches and open PRs')
 param githubPat string
 
@@ -189,6 +196,8 @@ module postsAPI 'modules/postsapi.bicep' = {
     azureTenantId: azureTenantId
     postsApiClientId: postsApiClientId
     postsApiClientSecret: postsApiClientSecret
+    githubToken: githubToken
+    githubRepo: githubRepo
   }
 }
 
