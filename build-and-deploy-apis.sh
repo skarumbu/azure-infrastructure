@@ -14,11 +14,13 @@ echo "📋 Getting Azure resource information..."
 CONTAINER_REGISTRY=$(az acr list --resource-group "$RESOURCE_GROUP" --query "[0].name" -o tsv)
 CONTAINER_REGISTRY_SERVER=$(az acr list --resource-group "$RESOURCE_GROUP" --query "[0].loginServer" -o tsv)
 FUNCTION_APP=$(az functionapp list --resource-group "$RESOURCE_GROUP" --query "[0].name" -o tsv)
-CONTAINER_APP=$(az containerapp list --resource-group "$RESOURCE_GROUP" --query "[0].name" -o tsv)
+MOMENTUM_CONTAINER_APP=$(az containerapp list --resource-group "$RESOURCE_GROUP" --query "[?contains(name, 'momentum-finder')].name | [0]" -o tsv)
+TRAIL_FINDER_CONTAINER_APP=$(az containerapp list --resource-group "$RESOURCE_GROUP" --query "[?contains(name, 'trail-finder')].name | [0]" -o tsv)
 
 echo "📦 Container Registry: $CONTAINER_REGISTRY"
 echo "⚡ Function App: $FUNCTION_APP"
-echo "🐳 Container App: $CONTAINER_APP"
+echo "🐳 Momentum Finder Container App: $MOMENTUM_CONTAINER_APP"
+echo "🥾 Trail Finder Container App: $TRAIL_FINDER_CONTAINER_APP"
 echo ""
 
 # === Deploy Momentum Finder (Container App) ===
@@ -60,9 +62,47 @@ docker push "${CONTAINER_REGISTRY_SERVER}/momentum-finder:latest"
 # Update container app
 echo "🔄 Updating Container App..."
 az containerapp update \
-  --name "$CONTAINER_APP" \
+  --name "$MOMENTUM_CONTAINER_APP" \
   --resource-group "$RESOURCE_GROUP" \
   --image "${CONTAINER_REGISTRY_SERVER}/momentum-finder:latest"
+
+cd ..
+
+# === Deploy Trail Finder (Container App) ===
+echo ""
+echo "🥾 Building and deploying Trail Finder API..."
+TRAIL_DIR="../trail_finder"
+
+if [ ! -d "$TRAIL_DIR" ]; then
+    echo "📥 Cloning trail_finder repository..."
+    git clone https://github.com/skarumbu/trail_finder.git "$TRAIL_DIR"
+fi
+
+cd "$TRAIL_DIR"
+
+if [ -f "Dockerfile" ]; then
+    echo "📝 Found Dockerfile in root directory"
+    DOCKERFILE_PATH="Dockerfile"
+    BUILD_CONTEXT="."
+else
+    echo "❌ Error: Dockerfile not found"
+    exit 1
+fi
+
+echo "🔐 Logging into Azure Container Registry..."
+az acr login --name "$CONTAINER_REGISTRY"
+
+echo "🏗️  Building Docker image..."
+docker build -f "$DOCKERFILE_PATH" -t "${CONTAINER_REGISTRY_SERVER}/trail-finder:latest" "$BUILD_CONTEXT"
+
+echo "⬆️  Pushing to Azure Container Registry..."
+docker push "${CONTAINER_REGISTRY_SERVER}/trail-finder:latest"
+
+echo "🔄 Updating Container App..."
+az containerapp update \
+  --name "$TRAIL_FINDER_CONTAINER_APP" \
+  --resource-group "$RESOURCE_GROUP" \
+  --image "${CONTAINER_REGISTRY_SERVER}/trail-finder:latest"
 
 cd ..
 
@@ -162,7 +202,11 @@ echo "✅ All APIs deployed successfully!"
 echo "=================================="
 echo ""
 echo "🌐 Momentum Finder API URL:"
-az containerapp show --name "$CONTAINER_APP" --resource-group "$RESOURCE_GROUP" --query "properties.configuration.ingress.fqdn" -o tsv
+az containerapp show --name "$MOMENTUM_CONTAINER_APP" --resource-group "$RESOURCE_GROUP" --query "properties.configuration.ingress.fqdn" -o tsv
+
+echo ""
+echo "🥾 Trail Finder API URL:"
+az containerapp show --name "$TRAIL_FINDER_CONTAINER_APP" --resource-group "$RESOURCE_GROUP" --query "properties.configuration.ingress.fqdn" -o tsv
 
 echo ""
 echo "⚡ Digits API URL:"
