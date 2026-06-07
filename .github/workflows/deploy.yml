@@ -61,4 +61,7 @@ jobs:
               githubPat="${{ secrets.BOT_GITHUB_PAT }}" \
               ideasBotImage="${{ secrets.IDEAS_BOT_IMAGE }}" \
               googleClientId="${{ secrets.GOOGLE_CLIENT_ID }}" \
+              postsApiClientId="${{ secrets.POSTS_API_CLIENT_ID }}" \
+              postsApiClientSecret="${{ secrets.POSTS_API_CLIENT_SECRET }}" \
+              githubToken="${{ secrets.POSTS_GITHUB_TOKEN }}" \
               corsOrigin="https://www.quixotry.me"
