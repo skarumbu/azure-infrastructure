@@ -20,7 +20,7 @@ resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-
   parent: openAiAccount
   name: 'gpt-4.1'
   sku: {
-    name: 'Standard'
+    name: 'GlobalStandard'
     capacity: 50
   }
   properties: {
@@ -37,7 +37,7 @@ resource gpt41MiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
   name: 'gpt-4.1-mini'
   dependsOn: [gpt41Deployment]
   sku: {
-    name: 'Standard'
+    name: 'GlobalStandard'
     capacity: 100
   }
   properties: {
