@@ -16,22 +16,39 @@ resource openAiAccount 'Microsoft.CognitiveServices/accounts@2023-05-01' = {
   }
 }
 
-resource gpt4oDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
+resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   parent: openAiAccount
-  name: 'gpt-4o'
+  name: 'gpt-4.1'
   sku: {
     name: 'Standard'
-    capacity: 10
+    capacity: 50
   }
   properties: {
     model: {
       format: 'OpenAI'
-      name: 'gpt-4o'
-      version: '2024-11-20'
+      name: 'gpt-4.1'
+      version: '2025-04-14'
+    }
+  }
+}
+
+resource gpt41MiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
+  parent: openAiAccount
+  name: 'gpt-4.1-mini'
+  dependsOn: [gpt41Deployment]
+  sku: {
+    name: 'Standard'
+    capacity: 100
+  }
+  properties: {
+    model: {
+      format: 'OpenAI'
+      name: 'gpt-4.1-mini'
+      version: '2025-04-14'
     }
   }
 }
 
 output endpoint string = openAiAccount.properties.endpoint
 output apiKey string = openAiAccount.listKeys().key1
-output deploymentName string = gpt4oDeployment.name
+output deploymentName string = gpt41Deployment.name
