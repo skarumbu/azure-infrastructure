@@ -127,8 +127,8 @@ resource authSettings 'Microsoft.Web/sites/config@2022-09-01' = {
   name: 'authsettingsV2'
   properties: {
     globalValidation: {
-      requireAuthentication: true
-      unauthenticatedClientAction: 'Return401'
+      requireAuthentication: false
+      unauthenticatedClientAction: 'AllowAnonymous'
     }
     identityProviders: {
       azureActiveDirectory: {
