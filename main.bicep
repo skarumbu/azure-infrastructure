@@ -220,6 +220,15 @@ module learningPlanOpenAI 'modules/learningplanopenai.bicep' = {
   }
 }
 
+// Module: Arch Content OpenAI (used by arch-content-update CI workflow)
+module archContentOpenAI 'modules/archcontentopenai.bicep' = {
+  name: 'archContentOpenAIDeployment'
+  scope: rg
+  params: {
+    location: 'eastus'
+  }
+}
+
 // Module: Learning Plan API (Azure Functions)
 module learningPlanAPI 'modules/learningplanapi.bicep' = {
   name: 'learningPlanAPIDeployment'
