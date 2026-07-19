@@ -49,24 +49,6 @@ resource gpt41MiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
   }
 }
 
-resource gpt53CodexDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
-  parent: openAiAccount
-  name: 'gpt-5.3-codex'
-  dependsOn: [gpt41MiniDeployment]
-  sku: {
-    name: 'GlobalStandard'
-    capacity: 50
-  }
-  properties: {
-    model: {
-      format: 'OpenAI'
-      name: 'gpt-5.3-codex'
-      version: '2026-02-24'
-    }
-  }
-}
-
 output endpoint string = openAiAccount.properties.endpoint
 output apiKey string = openAiAccount.listKeys().key1
 output deploymentName string = gpt41Deployment.name
-output codexDeploymentName string = gpt53CodexDeployment.name

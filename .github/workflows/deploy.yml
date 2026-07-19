@@ -66,6 +66,14 @@ jobs:
               githubToken="${{ secrets.POSTS_GITHUB_TOKEN }}" \
               corsOrigin="https://www.quixotry.me"
 
+      - name: Deploy Codex Model (best-effort, quota-gated)
+        continue-on-error: true
+        run: |
+          az deployment group create \
+            --name "codex-model-deploy-${{ github.sha }}" \
+            --resource-group my-website-prod-rg \
+            --template-file modules/ideasbotcodexmodel.bicep
+
   update-arch-content:
     needs: deploy
     uses: skarumbu/my-website/.github/workflows/arch-content-update-reusable.yml@main
