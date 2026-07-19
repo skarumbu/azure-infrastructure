@@ -49,11 +49,6 @@ resource gpt41MiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
   }
 }
 
-// gpt-5.3-codex is deployed separately via modules/ideasbotcodexmodel.bicep
-// (its own az deployment group create step) because it's gated on a quota
-// grant that isn't approved yet — keeping it out of this template means a
-// quota failure there can't block preflight validation of the rest of main.bicep.
-
 output endpoint string = openAiAccount.properties.endpoint
 output apiKey string = openAiAccount.listKeys().key1
 output deploymentName string = gpt41Deployment.name
