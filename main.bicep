@@ -79,6 +79,9 @@ param corsOrigin string = 'https://www.quixotry.me'
 @description('Ideas bot container image. Updated after first ACR push.')
 param ideasBotImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
 
+@description('Name of the gpt-5.3-codex deployment on the ideas-bot OpenAI account. Deployed separately by modules/ideasbotcodexmodel.bicep — see that file for why.')
+param ideasBotCodexDeploymentName string = 'gpt-5.3-codex'
+
 // Resource Group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: 'my-website-${environment}-rg'
@@ -257,7 +260,7 @@ module ideasBot 'modules/ideasbot.bicep' = {
     ideasApiUrl: ideasAPI.outputs.functionAppUrl
     azureOpenAiEndpoint: ideasBotOpenAI.outputs.endpoint
     azureOpenAiDeploymentName: ideasBotOpenAI.outputs.deploymentName
-    azureOpenAiCodexDeploymentName: ideasBotOpenAI.outputs.codexDeploymentName
+    azureOpenAiCodexDeploymentName: ideasBotCodexDeploymentName
     azureOpenAiApiKey: ideasBotOpenAI.outputs.apiKey
     githubPat: githubPat
     ideasWriteKey: ideasApiWriteKey
