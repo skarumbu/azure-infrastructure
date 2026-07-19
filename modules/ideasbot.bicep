@@ -6,6 +6,7 @@ param ideasApiFunctionPrincipalId string
 param ideasApiUrl string
 param azureOpenAiEndpoint string
 param azureOpenAiDeploymentName string
+param azureOpenAiCodexDeploymentName string
 
 @secure()
 param azureOpenAiApiKey string
@@ -83,6 +84,10 @@ resource ideasBotJob 'Microsoft.App/jobs@2023-05-01' = {
             {
               name: 'AZURE_OPENAI_DEPLOYMENT'
               value: azureOpenAiDeploymentName
+            }
+            {
+              name: 'AZURE_OPENAI_CODEX_DEPLOYMENT'
+              value: azureOpenAiCodexDeploymentName
             }
             {
               name: 'AZURE_OPENAI_API_KEY'

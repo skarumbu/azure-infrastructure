@@ -257,6 +257,7 @@ module ideasBot 'modules/ideasbot.bicep' = {
     ideasApiUrl: ideasAPI.outputs.functionAppUrl
     azureOpenAiEndpoint: ideasBotOpenAI.outputs.endpoint
     azureOpenAiDeploymentName: ideasBotOpenAI.outputs.deploymentName
+    azureOpenAiCodexDeploymentName: ideasBotOpenAI.outputs.codexDeploymentName
     azureOpenAiApiKey: ideasBotOpenAI.outputs.apiKey
     githubPat: githubPat
     ideasWriteKey: ideasApiWriteKey
