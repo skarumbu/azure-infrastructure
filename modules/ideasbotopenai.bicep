@@ -32,9 +32,9 @@ resource gpt41Deployment 'Microsoft.CognitiveServices/accounts/deployments@2023-
   }
 }
 
-resource gpt41MiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
+resource gpt5MiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2023-05-01' = {
   parent: openAiAccount
-  name: 'gpt-4.1-mini'
+  name: 'gpt-5-mini'
   dependsOn: [gpt41Deployment]
   sku: {
     name: 'GlobalStandard'
@@ -43,8 +43,8 @@ resource gpt41MiniDeployment 'Microsoft.CognitiveServices/accounts/deployments@2
   properties: {
     model: {
       format: 'OpenAI'
-      name: 'gpt-4.1-mini'
-      version: '2025-04-14'
+      name: 'gpt-5-mini'
+      version: '2025-08-07'
     }
   }
 }
