@@ -70,6 +70,10 @@ param githubRepo string = 'skarumbu/my-website'
 param githubPat string
 
 @secure()
+@description('GitHub PAT (actions:read scope) for dashboard-api to fetch workflow run status')
+param dashboardGithubToken string
+
+@secure()
 @description('Google OAuth client ID for learning-plan-api token verification')
 param googleClientId string
 
@@ -172,6 +176,7 @@ module dashboardAPI 'modules/dashboardapi.bicep' = {
     azureTenantId: azureTenantId
     azureClientId: azureClientId
     azureClientSecret: azureClientSecret
+    githubToken: dashboardGithubToken
   }
 }
 

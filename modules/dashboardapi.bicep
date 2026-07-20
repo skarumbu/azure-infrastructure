@@ -17,6 +17,10 @@ param azureClientId string
 @description('App Registration client secret for EasyAuth and OBO credential')
 param azureClientSecret string
 
+@secure()
+@description('GitHub PAT (actions:read scope) for fetching workflow run status per registered app')
+param githubToken string
+
 var uniqueSuffix = take(uniqueString(resourceGroup().id, 'dashboard'), 10)
 var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
 
@@ -131,6 +135,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'REGISTRY_TABLE_CONNECTION_STRING'
           value: storageConnectionString
+        }
+        {
+          name: 'GITHUB_TOKEN'
+          value: githubToken
         }
       ]
       cors: {
