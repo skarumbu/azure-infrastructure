@@ -62,8 +62,7 @@ jobs:
               dashboardGithubToken="${{ secrets.DASHBOARD_GITHUB_TOKEN }}" \
               ideasBotImage="${{ secrets.IDEAS_BOT_IMAGE }}" \
               googleClientId="${{ secrets.GOOGLE_CLIENT_ID }}" \
-              postsApiClientId="${{ secrets.POSTS_API_CLIENT_ID }}" \
-              postsApiClientSecret="${{ secrets.POSTS_API_CLIENT_SECRET }}" \
+              allowedWriters="${{ secrets.ALLOWED_WRITERS }}" \
               githubToken="${{ secrets.POSTS_GITHUB_TOKEN }}" \
               corsOrigin="https://www.quixotry.me"
 

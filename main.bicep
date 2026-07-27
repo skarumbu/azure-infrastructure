@@ -51,12 +51,8 @@ param ideasApiClientSecret string
 @description('Shared write key for machine-to-machine writes (ideator job → ideas-api)')
 param ideasApiWriteKey string
 
-@description('posts-api App Registration client ID')
-param postsApiClientId string
-
-@secure()
-@description('posts-api App Registration client secret')
-param postsApiClientSecret string
+@description('Comma-separated email allowlist for posts-api diary/write access. Empty allows any authenticated Google account to write.')
+param allowedWriters string = ''
 
 @secure()
 @description('GitHub PAT with repo scope for posts-api to write to GitHub')
@@ -201,11 +197,10 @@ module postsAPI 'modules/postsapi.bicep' = {
   params: {
     location: location
     environment: environment
-    azureTenantId: azureTenantId
-    postsApiClientId: postsApiClientId
-    postsApiClientSecret: postsApiClientSecret
     githubToken: githubToken
     githubRepo: githubRepo
+    googleClientId: googleClientId
+    allowedWriters: allowedWriters
   }
 }
 
