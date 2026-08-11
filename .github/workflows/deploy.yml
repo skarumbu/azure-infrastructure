@@ -64,6 +64,9 @@ jobs:
               postsApiClientId="${{ secrets.POSTS_API_CLIENT_ID }}" \
               postsApiClientSecret="${{ secrets.POSTS_API_CLIENT_SECRET }}" \
               githubToken="${{ secrets.POSTS_GITHUB_TOKEN }}" \
+              historyApiClientId="${{ secrets.HISTORY_API_CLIENT_ID }}" \
+              historyApiClientSecret="${{ secrets.HISTORY_API_CLIENT_SECRET }}" \
+              historyApiWriteKey="${{ secrets.HISTORY_API_WRITE_KEY }}" \
               corsOrigin="https://www.quixotry.me"
 
       - name: Deploy Codex Model (best-effort, quota-gated)
