@@ -94,10 +94,6 @@ resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
           value: storageConnectionString
         }
         {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'native'
-        }
-        {
           name: 'HISTORY_TABLE_CONNECTION_STRING'
           value: storageConnectionString
         }
