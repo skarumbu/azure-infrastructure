@@ -82,6 +82,17 @@ param ideasBotImage string = 'mcr.microsoft.com/azuredocs/containerapps-hellowor
 @description('Name of the gpt-5.3-codex deployment on the ideas-bot OpenAI account. Deployed separately by modules/ideasbotcodexmodel.bicep — see that file for why.')
 param ideasBotCodexDeploymentName string = 'gpt-5.3-codex'
 
+@description('history-api App Registration client ID')
+param historyApiClientId string
+
+@secure()
+@description('history-api App Registration client secret')
+param historyApiClientSecret string
+
+@secure()
+@description('Shared write key for machine-to-machine writes (wiki-update-pr workflow, posts-api → history-api)')
+param historyApiWriteKey string
+
 // Resource Group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: 'my-website-${environment}-rg'
@@ -204,6 +215,20 @@ module postsAPI 'modules/postsapi.bicep' = {
   }
 }
 
+// Module: History API (Azure Functions, Go on Flex Consumption)
+module historyAPI 'modules/historyapi.bicep' = {
+  name: 'historyAPIDeployment'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+    azureTenantId: azureTenantId
+    historyApiClientId: historyApiClientId
+    historyApiClientSecret: historyApiClientSecret
+    historyApiWriteKey: historyApiWriteKey
+  }
+}
+
 // Module: Ideas Bot OpenAI resource
 module ideasBotOpenAI 'modules/ideasbotopenai.bicep' = {
   name: 'ideasBotOpenAIDeployment'
@@ -291,3 +316,5 @@ output learningPlanAPIUrl string = learningPlanAPI.outputs.functionAppUrl
 output learningPlanAPIAppName string = learningPlanAPI.outputs.functionAppName
 output postsAPIUrl string = postsAPI.outputs.functionAppUrl
 output postsAPIAppName string = postsAPI.outputs.functionAppName
+output historyAPIUrl string = historyAPI.outputs.functionAppUrl
+output historyAPIAppName string = historyAPI.outputs.functionAppName
