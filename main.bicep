@@ -51,12 +51,8 @@ param ideasApiClientSecret string
 @description('Shared write key for machine-to-machine writes (ideator job → ideas-api)')
 param ideasApiWriteKey string
 
-@description('posts-api App Registration client ID')
-param postsApiClientId string
-
-@secure()
-@description('posts-api App Registration client secret')
-param postsApiClientSecret string
+@description('Comma-separated email allowlist for posts-api diary/write access. Empty allows any authenticated Google account to write.')
+param allowedWriters string = ''
 
 @secure()
 @description('GitHub PAT with repo scope for posts-api to write to GitHub')
@@ -68,6 +64,10 @@ param githubRepo string = 'skarumbu/my-website'
 @secure()
 @description('GitHub fine-grained PAT for ideas-bot to push branches and open PRs')
 param githubPat string
+
+@secure()
+@description('GitHub PAT (actions:read scope) for dashboard-api to fetch workflow run status')
+param dashboardGithubToken string
 
 @secure()
 @description('Google OAuth client ID for learning-plan-api token verification')
@@ -183,6 +183,7 @@ module dashboardAPI 'modules/dashboardapi.bicep' = {
     azureTenantId: azureTenantId
     azureClientId: azureClientId
     azureClientSecret: azureClientSecret
+    githubToken: dashboardGithubToken
   }
 }
 
@@ -207,11 +208,10 @@ module postsAPI 'modules/postsapi.bicep' = {
   params: {
     location: location
     environment: environment
-    azureTenantId: azureTenantId
-    postsApiClientId: postsApiClientId
-    postsApiClientSecret: postsApiClientSecret
     githubToken: githubToken
     githubRepo: githubRepo
+    googleClientId: googleClientId
+    allowedWriters: allowedWriters
   }
 }
 

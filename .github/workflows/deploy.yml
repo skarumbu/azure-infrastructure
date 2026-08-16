@@ -59,10 +59,10 @@ jobs:
               ideasApiClientSecret="${{ secrets.IDEAS_API_CLIENT_SECRET }}" \
               ideasApiWriteKey="${{ secrets.IDEAS_API_WRITE_KEY }}" \
               githubPat="${{ secrets.BOT_GITHUB_PAT }}" \
+              dashboardGithubToken="${{ secrets.DASHBOARD_GITHUB_TOKEN }}" \
               ideasBotImage="${{ secrets.IDEAS_BOT_IMAGE }}" \
               googleClientId="${{ secrets.GOOGLE_CLIENT_ID }}" \
-              postsApiClientId="${{ secrets.POSTS_API_CLIENT_ID }}" \
-              postsApiClientSecret="${{ secrets.POSTS_API_CLIENT_SECRET }}" \
+              allowedWriters="${{ secrets.ALLOWED_WRITERS }}" \
               githubToken="${{ secrets.POSTS_GITHUB_TOKEN }}" \
               historyApiClientId="${{ secrets.HISTORY_API_CLIENT_ID }}" \
               historyApiClientSecret="${{ secrets.HISTORY_API_CLIENT_SECRET }}" \

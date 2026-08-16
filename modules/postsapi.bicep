@@ -1,22 +1,22 @@
 param location string
 param environment string = 'prod'
 
-@description('Azure Entra ID tenant ID for EasyAuth')
-param azureTenantId string
-
-@description('posts-api App Registration client ID')
-param postsApiClientId string
-
-@secure()
-@description('posts-api App Registration client secret')
-param postsApiClientSecret string
-
 @secure()
 @description('GitHub PAT with repo scope for writing posts')
 param githubToken string
 
 @description('GitHub repo in owner/repo format (e.g. skarumbu/my-website)')
 param githubRepo string = 'skarumbu/my-website'
+
+@secure()
+@description('Comma-separated Google OAuth client IDs accepted as token audience (posts-api self-verifies Google ID tokens; no Azure-level EasyAuth)')
+param googleClientId string
+
+@description('Comma-separated email allowlist for write access. Empty allows any authenticated Google account to write.')
+param allowedWriters string = ''
+
+@description('Name of the private blob container used for diary entries')
+param diaryContainerName string = 'diary-entries'
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: 'postsapi${uniqueString(resourceGroup().id)}'
@@ -35,6 +35,14 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
 resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2022-09-01' = {
   parent: storageAccount
   name: 'default'
+}
+
+resource diaryContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2022-09-01' = {
+  parent: blobService
+  name: diaryContainerName
+  properties: {
+    publicAccess: 'None'
+  }
 }
 
 var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
@@ -89,16 +97,28 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: 'true'
         }
         {
-          name: 'POSTS_CLIENT_SECRET'
-          value: postsApiClientSecret
-        }
-        {
           name: 'GITHUB_TOKEN'
           value: githubToken
         }
         {
           name: 'GITHUB_REPO'
           value: githubRepo
+        }
+        {
+          name: 'GOOGLE_CLIENT_ID'
+          value: googleClientId
+        }
+        {
+          name: 'ALLOWED_WRITERS'
+          value: allowedWriters
+        }
+        {
+          name: 'POSTS_STORAGE_CONNECTION_STRING'
+          value: storageConnectionString
+        }
+        {
+          name: 'DIARY_CONTAINER_NAME'
+          value: diaryContainerName
         }
       ]
       cors: {
@@ -108,37 +128,6 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
       }
     }
     httpsOnly: true
-  }
-}
-
-resource authSettings 'Microsoft.Web/sites/config@2022-09-01' = {
-  parent: functionApp
-  name: 'authsettingsV2'
-  properties: {
-    globalValidation: {
-      requireAuthentication: false
-      unauthenticatedClientAction: 'AllowAnonymous'
-    }
-    identityProviders: {
-      azureActiveDirectory: {
-        enabled: true
-        registration: {
-          clientId: postsApiClientId
-          clientSecretSettingName: 'POSTS_CLIENT_SECRET'
-          openIdIssuer: '${az.environment().authentication.loginEndpoint}${azureTenantId}/v2.0'
-        }
-        validation: {
-          allowedAudiences: [
-            'api://${postsApiClientId}'
-          ]
-        }
-      }
-    }
-    login: {
-      tokenStore: {
-        enabled: true
-      }
-    }
   }
 }
 
