@@ -212,6 +212,8 @@ module postsAPI 'modules/postsapi.bicep' = {
     githubRepo: githubRepo
     googleClientId: googleClientId
     allowedWriters: allowedWriters
+    historyApiUrl: '${historyAPI.outputs.functionAppUrl}/api'
+    historyApiWriteKey: historyApiWriteKey
   }
 }
 

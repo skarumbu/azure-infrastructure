@@ -18,6 +18,13 @@ param allowedWriters string = ''
 @description('Name of the private blob container used for diary entries')
 param diaryContainerName string = 'diary-entries'
 
+@description('Base URL of history-api, including the /api prefix')
+param historyApiUrl string
+
+@secure()
+@description('Shared write key for machine-to-machine writes to history-api (posts-api -> history-api)')
+param historyApiWriteKey string
+
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: 'postsapi${uniqueString(resourceGroup().id)}'
   location: location
@@ -119,6 +126,14 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         {
           name: 'DIARY_CONTAINER_NAME'
           value: diaryContainerName
+        }
+        {
+          name: 'HISTORY_API_URL'
+          value: historyApiUrl
+        }
+        {
+          name: 'HISTORY_API_KEY'
+          value: historyApiWriteKey
         }
       ]
       cors: {
