@@ -46,3 +46,4 @@ module runningApp 'modules/runningapp.bicep' = {
 
 output swaUrl string = runningApp.outputs.swaDefaultHostname
 output postgresHostname string = runningApp.outputs.postgresHostname
+output appInsightsConnectionString string = runningApp.outputs.appInsightsConnectionString

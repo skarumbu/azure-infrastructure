@@ -14,6 +14,32 @@ param googleClientSecret string
 param databaseUrl string
 
 // ---------------------------------------------------------------------------
+// Application Insights (client-side telemetry for the frontend)
+// ---------------------------------------------------------------------------
+
+resource appInsightsLogs 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+  name: 'running-app-${environment}-logs'
+  location: location
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 30
+  }
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: 'running-app-${environment}-insights'
+  location: location
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: appInsightsLogs.id
+    IngestionMode: 'LogAnalytics'
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Azure Static Web App (Standard tier required for linked backend)
 // ---------------------------------------------------------------------------
 
@@ -147,3 +173,6 @@ output swaName string = swa.name
 output functionAppName string = functionApp.name
 output postgresHostname string = postgres.properties.fullyQualifiedDomainName
 output postgresDatabaseName string = runningAppDb.name
+
+@secure()
+output appInsightsConnectionString string = appInsights.properties.ConnectionString
