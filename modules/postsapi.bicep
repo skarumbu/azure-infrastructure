@@ -25,6 +25,33 @@ param historyApiUrl string
 @description('Shared write key for machine-to-machine writes to history-api (posts-api -> history-api)')
 param historyApiWriteKey string
 
+// ---------------------------------------------------------------------------
+// Application Insights (backend request telemetry — usage/error/latency per
+// route, e.g. writing vs. diary create/update/delete call volume)
+// ---------------------------------------------------------------------------
+
+resource appInsightsLogs 'Microsoft.OperationalInsights/workspaces@2022-10-01' = {
+  name: 'posts-api-${environment}-logs'
+  location: location
+  properties: {
+    sku: {
+      name: 'PerGB2018'
+    }
+    retentionInDays: 30
+  }
+}
+
+resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
+  name: 'posts-api-${environment}-insights'
+  location: location
+  kind: 'web'
+  properties: {
+    Application_Type: 'web'
+    WorkspaceResourceId: appInsightsLogs.id
+    IngestionMode: 'LogAnalytics'
+  }
+}
+
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-09-01' = {
   name: 'postsapi${uniqueString(resourceGroup().id)}'
   location: location
@@ -135,6 +162,10 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           name: 'HISTORY_API_KEY'
           value: historyApiWriteKey
         }
+        {
+          name: 'APPLICATIONINSIGHTS_CONNECTION_STRING'
+          value: appInsights.properties.ConnectionString
+        }
       ]
       cors: {
         allowedOrigins: [
@@ -150,3 +181,4 @@ output functionAppName string = functionApp.name
 output functionAppUrl string = 'https://${functionApp.properties.defaultHostName}'
 output functionPrincipalId string = functionApp.identity.principalId
 output storageAccountName string = storageAccount.name
+output appInsightsName string = appInsights.name
