@@ -34,6 +34,8 @@ resource appInsights 'Microsoft.Insights/components@2020-02-02' = {
   }
 }
 
+var deploymentContainerName = 'app-package-daily-api-${environment}'
+
 resource storageAccount 'Microsoft.Storage/storageAccounts@2023-01-01' = {
   name: 'dailyapi${uniqueString(resourceGroup().id)}'
   location: location
@@ -68,22 +70,35 @@ resource cardsTable 'Microsoft.Storage/storageAccounts/tableServices/tables@2023
   name: 'DailyCards'
 }
 
+resource blobService 'Microsoft.Storage/storageAccounts/blobServices@2023-01-01' = {
+  parent: storageAccount
+  name: 'default'
+}
+
+resource deploymentContainer 'Microsoft.Storage/storageAccounts/blobServices/containers@2023-01-01' = {
+  parent: blobService
+  name: deploymentContainerName
+}
+
 var storageConnectionString = 'DefaultEndpointsProtocol=https;AccountName=${storageAccount.name};AccountKey=${storageAccount.listKeys().keys[0].value};EndpointSuffix=core.windows.net'
 
-resource appServicePlan 'Microsoft.Web/serverfarms@2022-09-01' = {
+// Flex Consumption (FC1), like history-api. Azure no longer allows a new
+// Linux Y1 plan in this resource group ("Dynamic SKU, Linux Worker not
+// available"). Flex rejects FUNCTIONS_WORKER_RUNTIME, FUNCTIONS_EXTENSION_VERSION
+// and WEBSITE_CONTENT* settings; the runtime is set in functionAppConfig.
+resource appServicePlan 'Microsoft.Web/serverfarms@2024-04-01' = {
   name: 'daily-api-${environment}-plan'
   location: location
   sku: {
-    name: 'Y1'
-    tier: 'Dynamic'
+    name: 'FC1'
+    tier: 'FlexConsumption'
   }
   properties: {
     reserved: true
   }
-  kind: 'functionapp'
 }
 
-resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
+resource functionApp 'Microsoft.Web/sites@2024-04-01' = {
   name: 'daily-api-${environment}-${uniqueString(resourceGroup().id)}'
   location: location
   kind: 'functionapp,linux'
@@ -92,32 +107,16 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
   }
   properties: {
     serverFarmId: appServicePlan.id
+    httpsOnly: true
     siteConfig: {
-      linuxFxVersion: 'Python|3.11'
       appSettings: [
         {
           name: 'AzureWebJobsStorage'
           value: storageConnectionString
         }
         {
-          name: 'WEBSITE_CONTENTAZUREFILECONNECTIONSTRING'
+          name: 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
           value: storageConnectionString
-        }
-        {
-          name: 'WEBSITE_CONTENTSHARE'
-          value: 'daily-api-${environment}-content'
-        }
-        {
-          name: 'FUNCTIONS_EXTENSION_VERSION'
-          value: '~4'
-        }
-        {
-          name: 'FUNCTIONS_WORKER_RUNTIME'
-          value: 'python'
-        }
-        {
-          name: 'SCM_DO_BUILD_DURING_DEPLOYMENT'
-          value: 'true'
         }
         {
           name: 'GOOGLE_CLIENT_ID'
@@ -142,7 +141,26 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
         ]
       }
     }
-    httpsOnly: true
+    functionAppConfig: {
+      deployment: {
+        storage: {
+          type: 'blobContainer'
+          value: '${storageAccount.properties.primaryEndpoints.blob}${deploymentContainerName}'
+          authentication: {
+            type: 'StorageAccountConnectionString'
+            storageAccountConnectionStringName: 'DEPLOYMENT_STORAGE_CONNECTION_STRING'
+          }
+        }
+      }
+      scaleAndConcurrency: {
+        maximumInstanceCount: 40
+        instanceMemoryMB: 2048
+      }
+      runtime: {
+        name: 'python'
+        version: '3.12'
+      }
+    }
   }
 }
 
