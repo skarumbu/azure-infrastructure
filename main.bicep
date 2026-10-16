@@ -217,6 +217,18 @@ module postsAPI 'modules/postsapi.bicep' = {
   }
 }
 
+// Module: Daily API (Azure Functions) — /today's Checklist, Daily Links, Cards
+module dailyAPI 'modules/dailyapi.bicep' = {
+  name: 'dailyAPIDeployment'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+    googleClientId: googleClientId
+    allowedWriters: allowedWriters
+  }
+}
+
 // Module: History API (Azure Functions, Go on Flex Consumption)
 module historyAPI 'modules/historyapi.bicep' = {
   name: 'historyAPIDeployment'
@@ -318,5 +330,7 @@ output learningPlanAPIUrl string = learningPlanAPI.outputs.functionAppUrl
 output learningPlanAPIAppName string = learningPlanAPI.outputs.functionAppName
 output postsAPIUrl string = postsAPI.outputs.functionAppUrl
 output postsAPIAppName string = postsAPI.outputs.functionAppName
+output dailyAPIUrl string = dailyAPI.outputs.functionAppUrl
+output dailyAPIAppName string = dailyAPI.outputs.functionAppName
 output historyAPIUrl string = historyAPI.outputs.functionAppUrl
 output historyAPIAppName string = historyAPI.outputs.functionAppName

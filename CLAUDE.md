@@ -48,6 +48,7 @@ az bicep build --file modules/<module>.bicep
 4. Container App Environment (`modules/containerappenvironment.bicep`) — shared managed environment with Log Analytics (30-day retention)
 5. Momentum Finder API (`modules/momentumfinder.bicep`) — Python app on Container Apps, port 8000, scales 0–10 replicas
 6. Digits API (`modules/digitsfunctions.bicep`) — Python 3.11 Azure Functions on Dynamic (Y1) plan, with a dedicated Storage Account
+7. Daily API (`modules/dailyapi.bicep`) — Python 3.11 Azure Functions on Y1, backend for quixotry.me/today (Checklist, Daily Links, spaced-repetition Cards). Own Storage Account `dailyapi<uniqueString>` holding Table Storage tables `DailyChecklist`, `DailyLinks`, `DailyCards`; App Insights `daily-api-{environment}-insights`. Split out of posts-api, which keeps a temporary `DAILY_STORAGE_CONNECTION_STRING` setting until its daily routes are removed.
 
 **External source repos** cloned at deploy time by `build-and-deploy-apis.sh`:
 - Frontend: `github.com/skarumbu/my-website`
@@ -62,6 +63,7 @@ az bicep build --file modules/<module>.bicep
 | Frontend (SWA default) | `https://delightful-water-01503ef10.6.azurestaticapps.net` |
 | Momentum Finder API | `https://momentum-finder-prod.blueplant-685bd8b6.centralus.azurecontainerapps.io` |
 | Digits API | `https://digits-api-prod-hwbxtkz6lsfoq.azurewebsites.net/api/DigitsGetter` |
+| Daily API | Function App `daily-api-{environment}-{uniqueString(rg.id)}`; hostname is the `dailyAPIUrl` deployment output |
 
 ## Custom Domain (quixotry.me)
 
