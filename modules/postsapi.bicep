@@ -151,6 +151,12 @@ resource functionApp 'Microsoft.Web/sites@2022-09-01' = {
           value: storageConnectionString
         }
         {
+          // Temporary: /today's tables still live in this account until
+          // posts-api's daily routes are removed (moved to daily-api).
+          name: 'DAILY_STORAGE_CONNECTION_STRING'
+          value: storageConnectionString
+        }
+        {
           name: 'DIARY_CONTAINER_NAME'
           value: diaryContainerName
         }
