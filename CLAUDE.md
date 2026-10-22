@@ -48,7 +48,7 @@ az bicep build --file modules/<module>.bicep
 4. Container App Environment (`modules/containerappenvironment.bicep`) — shared managed environment with Log Analytics (30-day retention)
 5. Momentum Finder API (`modules/momentumfinder.bicep`) — Python app on Container Apps, port 8000, scales 0–10 replicas
 6. Digits API (`modules/digitsfunctions.bicep`) — Python 3.11 Azure Functions on Dynamic (Y1) plan, with a dedicated Storage Account
-7. Daily API (`modules/dailyapi.bicep`) — Python 3.12 Azure Functions on Flex Consumption (FC1; a new Linux Y1 plan is refused in this resource group), backend for quixotry.me/today (Checklist, Daily Links, spaced-repetition Cards). Own Storage Account `dailyapi<uniqueString>` holding Table Storage tables `DailyChecklist`, `DailyLinks`, `DailyCards`; App Insights `daily-api-{environment}-insights`. Split out of posts-api, which keeps a temporary `DAILY_STORAGE_CONNECTION_STRING` setting until its daily routes are removed.
+7. Daily API (`modules/dailyapi.bicep`) — Python 3.12 Azure Functions on Flex Consumption (FC1; a new Linux Y1 plan is refused in this resource group), backend for quixotry.me/today (Checklist, Daily Links, spaced-repetition Cards). Own Storage Account `dailyapi<uniqueString>` holding Table Storage tables `DailyChecklist`, `DailyLinks`, `DailyCards`; App Insights `daily-api-{environment}-insights`. Split out of posts-api.
 
 **External source repos** cloned at deploy time by `build-and-deploy-apis.sh`:
 - Frontend: `github.com/skarumbu/my-website`
