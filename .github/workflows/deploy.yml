@@ -47,6 +47,15 @@ jobs:
             --output tsv 2>/dev/null || echo "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest")
           echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
 
+      - name: Require CONGRESS_API_KEY secret
+        env:
+          CONGRESS_API_KEY: ${{ secrets.CONGRESS_API_KEY }}
+        run: |
+          if [ -z "$CONGRESS_API_KEY" ]; then
+            echo "::error::Repo secret CONGRESS_API_KEY is empty or missing. Set it (gh secret set CONGRESS_API_KEY) before deploying; the poligraph-sync-prod job secret would otherwise fail the production deploy."
+            exit 1
+          fi
+
       - name: Deploy Bicep
         run: |
           az deployment sub create \
