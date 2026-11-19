@@ -93,6 +93,13 @@ param historyApiClientSecret string
 @description('Shared write key for machine-to-machine writes (wiki-update-pr workflow, posts-api → history-api)')
 param historyApiWriteKey string
 
+@secure()
+@description('api.data.gov key for the Congress.gov API (poligraph sync job)')
+param congressApiKey string
+
+@description('PoliGraph sync job container image. Updated after first ACR push.')
+param poligraphImage string = 'mcr.microsoft.com/azuredocs/containerapps-helloworld:latest'
+
 // Resource Group
 resource rg 'Microsoft.Resources/resourceGroups@2021-04-01' = {
   name: 'my-website-${environment}-rg'
@@ -307,6 +314,20 @@ module ideasBot 'modules/ideasbot.bicep' = {
   }
 }
 
+// Module: PoliGraph API (Function App, Python on Flex Consumption) + nightly sync job
+module poligraph 'modules/poligraph.bicep' = {
+  name: 'poligraphDeployment'
+  scope: rg
+  params: {
+    location: location
+    environment: environment
+    containerRegistryName: containerRegistry.outputs.name
+    containerAppEnvId: containerAppEnv.outputs.id
+    congressApiKey: congressApiKey
+    image: poligraphImage
+  }
+}
+
 // Cost Management Reader role assignment at subscription scope
 module costMgmtRole 'modules/costmgmtrole.bicep' = {
   name: 'costMgmtRoleDeployment'
@@ -334,3 +355,6 @@ output dailyAPIUrl string = dailyAPI.outputs.functionAppUrl
 output dailyAPIAppName string = dailyAPI.outputs.functionAppName
 output historyAPIUrl string = historyAPI.outputs.functionAppUrl
 output historyAPIAppName string = historyAPI.outputs.functionAppName
+output poligraphAPIUrl string = poligraph.outputs.functionAppUrl
+output poligraphAPIAppName string = poligraph.outputs.functionAppName
+output poligraphSyncJobName string = poligraph.outputs.jobName
