@@ -64,6 +64,8 @@ az bicep build --file modules/<module>.bicep
 | Momentum Finder API | `https://momentum-finder-prod.blueplant-685bd8b6.centralus.azurecontainerapps.io` |
 | Digits API | `https://digits-api-prod-hwbxtkz6lsfoq.azurewebsites.net/api/DigitsGetter` |
 | Daily API | Function App `daily-api-{environment}-{uniqueString(rg.id)}`; hostname is the `dailyAPIUrl` deployment output |
+| PoliGraph API | Function App `poligraph-api-prod` (Flex Consumption, Python 3.11); hostname is the `poligraphAPIUrl` deployment output |
+| PoliGraph sync job | Container App Job `poligraph-sync-prod`, nightly at 07:00 UTC, image repository `poligraph-sync` in ACR |
 
 ## Custom Domain (quixotry.me)
 

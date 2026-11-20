@@ -37,6 +37,25 @@ jobs:
             --output tsv 2>/dev/null || echo "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest")
           echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
 
+      - name: Read current PoliGraph sync image
+        id: pg_image
+        run: |
+          IMAGE=$(az containerapp job show \
+            --name poligraph-sync-prod \
+            --resource-group my-website-prod-rg \
+            --query "properties.template.containers[0].image" \
+            --output tsv 2>/dev/null || echo "mcr.microsoft.com/azuredocs/containerapps-helloworld:latest")
+          echo "image=$IMAGE" >> "$GITHUB_OUTPUT"
+
+      - name: Require CONGRESS_API_KEY secret
+        env:
+          CONGRESS_API_KEY: ${{ secrets.CONGRESS_API_KEY }}
+        run: |
+          if [ -z "$CONGRESS_API_KEY" ]; then
+            echo "::error::Repo secret CONGRESS_API_KEY is empty or missing. Set it (gh secret set CONGRESS_API_KEY) before deploying; the poligraph-sync-prod job secret would otherwise fail the production deploy."
+            exit 1
+          fi
+
       - name: Deploy Bicep
         run: |
           az deployment sub create \
@@ -49,6 +68,8 @@ jobs:
               customDomain="www.quixotry.me" \
               momentumFinderImage="${{ steps.mf_image.outputs.image }}" \
               trailFinderImage="${{ steps.tf_image.outputs.image }}" \
+              poligraphImage="${{ steps.pg_image.outputs.image }}" \
+              congressApiKey="${{ secrets.CONGRESS_API_KEY }}" \
               googlePlacesApiKey="${{ secrets.GOOGLE_PLACES_API_KEY }}" \
               googleSearchApiKey="${{ secrets.GOOGLE_SEARCH_API_KEY }}" \
               googleSearchEngineId="${{ secrets.GOOGLE_SEARCH_ENGINE_ID }}" \
